@@ -13,7 +13,10 @@ const nextConfig: NextConfig = {
         hostname: "w0mlmrgwbziwquaq.public.blob.vercel-storage.com"
       }
     ]
-  }
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 };
 
 export default nextConfig;

@@ -81,7 +81,8 @@ const serviceTypes: ServiceType[] = [
   }
 ];
 
-export default function ServiceTypePage({ params }: { params: { serviceType: string } }) {
+export default async function ServiceTypePage({ params }: { params: Promise<{ serviceType: string }> }) {
+  const { serviceType } = await params;
   const [isLoading, setIsLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const router = useRouter();
@@ -107,7 +108,7 @@ export default function ServiceTypePage({ params }: { params: { serviceType: str
     );
   }
 
-  const selectedService = serviceTypes.find(service => service.id === params.serviceType);
+  const selectedService = serviceTypes.find(service => service.id === serviceType);
 
   if (!selectedService) {
     return (
