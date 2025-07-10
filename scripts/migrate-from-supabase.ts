@@ -1,4 +1,4 @@
-// @ts-expect-error - This is an optional migration script that requires Supabase setup
+// This is an optional migration script that requires Supabase setup
 import { createClient } from '@supabase/supabase-js';
 import prisma from '../src/lib/prisma';
 
