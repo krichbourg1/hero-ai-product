@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { Loader2, Check, CreditCard } from 'lucide-react';
+import { Loader2, Check, CreditCard, X } from 'lucide-react';
 
 interface Plan {
   id: string;
@@ -27,51 +27,48 @@ const plans: Plan[] = [
   {
     id: 'pro',
     name: 'Professional',
-    price: 9.99,
+    price: 12.99,
     features: [
-      'Create unlimited resumes',
+      'Create 3 resumes',
+      'AI Power transformations',
+      'Priority support',
       'Premium templates',
       'Export to multiple formats',
-      'Priority support',
-      'AI-powered suggestions',
       'Custom branding'
     ],
     isPopular: true
   },
   {
-    id: 'enterprise',
-    name: 'Enterprise',
-    price: 29.99,
+    id: 'premium-pro',
+    name: 'Premium Pro',
+    price: 24.99,
     features: [
-      'All Professional features',
-      'Team collaboration',
-      'Custom domain',
-      'API access',
+      'Unlimited resumes',
+      'AI Power suggestions',
+      'Job link resume tailoring',
       'Dedicated support',
+      'All Professional features',
       'Custom integrations'
     ]
   }
 ];
 
 export default function SubscriptionPage() {
-  const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [showComingSoon, setShowComingSoon] = useState(false);
 
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
+      await supabase.auth.getUser();
       setIsLoading(false);
     };
     checkSession();
   }, []);
 
   const handleSubscribe = async () => {
-    setIsProcessing(true);
-    // TODO: Implement subscription functionality
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulated delay
-    setIsProcessing(false);
+    setShowComingSoon(true);
+    // Auto-hide the popup after 3 seconds
+    setTimeout(() => setShowComingSoon(false), 3000);
   };
 
   if (isLoading) {
@@ -84,6 +81,32 @@ export default function SubscriptionPage() {
 
   return (
     <div className="px-4 py-8 lg:px-8">
+      {/* Coming Soon Popup */}
+      {showComingSoon && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 max-w-md mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-white">Coming Soon!</h3>
+              <button
+                onClick={() => setShowComingSoon(false)}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-gray-300 mb-4">
+              This feature is coming soon! Please enjoy our free version for now.
+            </p>
+            <button
+              onClick={() => setShowComingSoon(false)}
+              className="w-full px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-medium transition-colors"
+            >
+              Got it!
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="mb-12 text-center">
         <h1 className="text-3xl font-bold text-white">
@@ -137,7 +160,6 @@ export default function SubscriptionPage() {
 
               <button
                 onClick={() => handleSubscribe()}
-                disabled={isProcessing}
                 className={`
                   mt-8 w-full px-6 py-3 rounded-lg font-medium text-white
                   flex items-center justify-center gap-2 transition-colors
@@ -148,17 +170,11 @@ export default function SubscriptionPage() {
                   disabled:opacity-50 disabled:cursor-not-allowed
                 `}
               >
-                {isProcessing ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <CreditCard className="w-5 h-5" />
-                    Subscribe Now
-                  </>
-                )}
+                {/* isProcessing is removed, so this button will always show "Subscribe Now" */}
+                <>
+                  <CreditCard className="w-5 h-5" />
+                  Subscribe Now
+                </>
               </button>
             </div>
           </div>

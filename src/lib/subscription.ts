@@ -1,32 +1,27 @@
-import { env } from "@/env";
 import { cache } from "react";
-import prisma from "./prisma";
+import { getUserSubscription } from "./supabase-db";
+import { env } from "@/env";
 
-export type SubscriptionLevel = "free" | "pro" | "pro_plus";
+export type SubscriptionLevel = "free" | "professional" | "premium-pro";
 
 export const getUserSubscriptionLevel = cache(
   async (userId: string): Promise<SubscriptionLevel> => {
-    const subscription = await prisma.userSubscription.findUnique({
-      where: {
-        userId,
-      },
-    });
+    const subscription = await getUserSubscription(userId);
 
-    if (!subscription || subscription.stripeCurrentPeriodEnd < new Date()) {
+    if (!subscription || new Date(subscription.stripe_current_period_end) < new Date()) {
       return "free";
     }
 
     if (
-      subscription.stripePriceId === env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY
+      subscription.stripe_price_id === env.NEXT_PUBLIC_STRIPE_PRICE_ID_PROFESSIONAL
     ) {
-      return "pro";
+      return "professional";
     }
 
     if (
-      subscription.stripePriceId ===
-      env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_PLUS_MONTHLY
+      subscription.stripe_price_id === env.NEXT_PUBLIC_STRIPE_PRICE_ID_PREMIUM_PRO
     ) {
-      return "pro_plus";
+      return "premium-pro";
     }
 
     throw new Error("Invalid subscription");
