@@ -3,6 +3,27 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
+// Determine the correct redirect URL based on environment
+const getRedirectUrl = () => {
+  if (typeof window === 'undefined') {
+    // Server-side rendering
+    return process.env.NEXT_PUBLIC_SITE_URL || 'https://heroservices.ai';
+  }
+  
+  // Client-side
+  const hostname = window.location.hostname;
+  const protocol = window.location.protocol;
+  const port = window.location.port;
+  
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    // Development environment
+    return `${protocol}//${hostname}${port ? `:${port}` : ''}`;
+  } else {
+    // Production environment
+    return 'https://heroservices.ai';
+  }
+};
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     // Enable automatic session refresh
@@ -20,4 +41,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
       'X-Client-Info': 'hero-ai-product',
     },
   },
-}); 
+});
+
+// Export the redirect URL function for use in auth components
+export { getRedirectUrl }; 

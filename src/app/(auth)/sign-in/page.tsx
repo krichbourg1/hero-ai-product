@@ -2,7 +2,7 @@
 
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase, getRedirectUrl } from '@/lib/supabaseClient';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -99,7 +99,8 @@ export default function SignInPage() {
         {/* Auth Container */}
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 shadow-2xl">
           <Auth 
-            supabaseClient={supabase} 
+            supabaseClient={supabase}
+            redirectTo={getRedirectUrl()}
             appearance={{
               theme: ThemeSupa,
               variables: {
