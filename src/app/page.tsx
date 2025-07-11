@@ -41,18 +41,18 @@ export default function Home() {
               </div>
 
               {/* Stats Section */}
-              <div className="grid grid-cols-3 gap-6 mt-12">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
                 <div className="glass-effect rounded-lg p-4 text-center">
-                  <div className="text-3xl font-bold text-green-400 mb-2">10k+</div>
+                  <div className="text-3xl font-bold text-green-400 mb-2">500+</div>
                   <div className="text-sm text-blue-200">Veterans Helped</div>
                 </div>
                 <div className="glass-effect rounded-lg p-4 text-center">
-                  <div className="text-3xl font-bold text-green-400 mb-2">95%</div>
-                  <div className="text-sm text-blue-200">Success Rate</div>
+                  <div className="text-3xl font-bold text-green-400 mb-2">750+</div>
+                  <div className="text-sm text-blue-200">Transformed MOS/Rates across all Branches</div>
                 </div>
                 <div className="glass-effect rounded-lg p-4 text-center">
-                  <div className="text-3xl font-bold text-green-400 mb-2">48hrs</div>
-                  <div className="text-sm text-blue-200">Avg. Response</div>
+                  <div className="text-3xl font-bold text-green-400 mb-2">1000+</div>
+                  <div className="text-sm text-blue-200">Resumes Created</div>
                 </div>
               </div>
             </div>
@@ -170,8 +170,8 @@ export default function Home() {
       <div id="success-stories" className="py-24 bg-[#0a0c1b]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">Success Stories</h2>
-            <p className="text-xl text-blue-200">From military service to civilian success</p>
+            <h2 className="text-4xl font-bold text-white mb-4">Translation Success Stories</h2>
+            <p className="text-xl text-blue-200">See how HERO.AI transforms complex military experience into clear civilian language</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -179,20 +179,20 @@ export default function Home() {
               {
                 name: "John D.",
                 role: "Former Marine Corps Squad Leader",
-                current: "Project Manager at Fortune 500",
-                quote: "HERO.AI helped me translate my leadership experience into terms civilian employers understand."
+                current: "Resume Translation Success",
+                quote: "HERO.AI perfectly translated my complex military leadership into clear civilian terms that hiring managers can understand."
               },
               {
                 name: "Sarah M.",
                 role: "Ex-Air Force Logistics Officer",
-                current: "Supply Chain Director",
-                quote: "The AI perfectly captured my military logistics experience in civilian terms."
+                current: "Experience Translation",
+                quote: "The AI helped me explain my military logistics experience in ways that civilian employers actually value and understand."
               },
               {
                 name: "Mike R.",
                 role: "Navy Corpsman",
-                current: "Healthcare Administrator",
-                quote: "Thanks to HERO.AI, I landed my dream job in civilian healthcare management."
+                current: "Skills Translation",
+                quote: "HERO.AI transformed my medical military experience into civilian healthcare terminology that resonates with employers."
               }
             ].map((story, index) => (
               <div key={index} className="glass-effect rounded-xl p-8">
