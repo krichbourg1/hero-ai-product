@@ -11,6 +11,10 @@ export default function SignInPage() {
   const hasRedirected = useRef(false);
   const [isMobile, setIsMobile] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  
+  // Get the redirect URL and log it for debugging
+  const redirectUrl = getRedirectUrl();
+  console.log('SignInPage redirect URL:', redirectUrl);
 
   // Detect mobile device
   useEffect(() => {
@@ -100,7 +104,11 @@ export default function SignInPage() {
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 shadow-2xl">
           <Auth 
             supabaseClient={supabase}
-            redirectTo={getRedirectUrl()}
+            redirectTo={redirectUrl}
+            queryParams={{
+              access_type: 'offline',
+              prompt: 'consent',
+            }}
             appearance={{
               theme: ThemeSupa,
               variables: {

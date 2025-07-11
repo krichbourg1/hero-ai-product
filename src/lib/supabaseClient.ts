@@ -5,23 +5,35 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 // Determine the correct redirect URL based on environment
 const getRedirectUrl = () => {
-  if (typeof window === 'undefined') {
-    // Server-side rendering
-    return process.env.NEXT_PUBLIC_SITE_URL || 'https://heroservices.ai';
-  }
+  // Check if we're in development mode
+  const isDevelopment = process.env.NODE_ENV === 'development';
   
-  // Client-side
-  const hostname = window.location.hostname;
-  const protocol = window.location.protocol;
-  const port = window.location.port;
+  let redirectUrl: string;
   
-  if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    // Development environment
-    return `${protocol}//${hostname}${port ? `:${port}` : ''}`;
+  if (isDevelopment) {
+    // Development environment - use localhost
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname;
+      const protocol = window.location.protocol;
+      const port = window.location.port;
+      redirectUrl = `${protocol}//${hostname}${port ? `:${port}` : ''}`;
+    } else {
+      redirectUrl = 'http://localhost:3001';
+    }
   } else {
-    // Production environment
-    return 'https://heroservices.ai';
+    // Production environment - always use the production domain
+    redirectUrl = 'https://heroservices.ai';
   }
+  
+  // Debug logging
+  console.log('Auth redirect URL:', {
+    isDevelopment,
+    nodeEnv: process.env.NODE_ENV,
+    redirectUrl,
+    hostname: typeof window !== 'undefined' ? window.location.hostname : 'server-side'
+  });
+  
+  return redirectUrl;
 };
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
