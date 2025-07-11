@@ -3,7 +3,7 @@
 import { useState, useTransition, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { FileText, User, CreditCard, Menu, X, LogOut, Home, Loader2 } from 'lucide-react';
+import { FileText, User, CreditCard, Menu, LogOut, Home, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 
 const sidebarItems = [
@@ -39,6 +39,7 @@ export default function DashboardLayout({
   const [activeNavItem, setActiveNavItem] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -55,6 +56,16 @@ export default function DashboardLayout({
     checkSession();
   }, [router]);
 
+  // Handle scroll for mobile navigation
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     router.push('/');
@@ -67,6 +78,11 @@ export default function DashboardLayout({
     startTransition(() => {
       router.push(href);
     });
+    
+    // Close sidebar on mobile after navigation
+    if (window.innerWidth < 1024) {
+      setIsSidebarOpen(false);
+    }
   };
 
   if (isLoading) {
@@ -89,27 +105,42 @@ export default function DashboardLayout({
         </div>
       )}
 
-      {/* Mobile Sidebar Toggle */}
-      <button
-        className="fixed top-4 left-4 z-50 p-2 bg-white/5 rounded-lg border border-white/10 lg:hidden transition-all duration-200 hover:bg-white/10"
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-      >
-        {isSidebarOpen ? (
-          <X className="w-6 h-6 text-white" />
-        ) : (
-          <Menu className="w-6 h-6 text-white" />
-        )}
-      </button>
+      {/* Mobile Top Navigation Bar - Disappears when scrolling */}
+      <div className={`
+        lg:hidden fixed top-0 left-0 right-0 z-40 transition-all duration-300 ease-in-out
+        ${isScrolled ? '-translate-y-full' : 'translate-y-0'}
+        bg-gradient-to-r from-[#0a0c1b] via-[#1a1f35] to-[#0a0c1b] shadow-2xl border-b-2 border-emerald-500/30
+        backdrop-blur-md
+      `}>
+        <div className="flex items-center justify-between px-4 py-4">
+          <Link 
+            href="/" 
+            className="text-xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-blue-300 to-emerald-400 drop-shadow-lg"
+          >
+            HERO.AI
+          </Link>
+          <button
+            className="p-3 bg-emerald-600/20 rounded-xl border-2 border-emerald-500/40 transition-all duration-200 hover:bg-emerald-600/30 hover:border-emerald-400/60 hover:scale-105 shadow-lg hover:shadow-emerald-500/25"
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          >
+            <Menu className="w-5 h-5 text-emerald-300" />
+          </button>
+        </div>
+      </div>
+
+
 
       {/* Sidebar */}
       <aside className={`
         fixed top-0 left-0 z-40 h-screen transition-transform duration-300 ease-in-out
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:translate-x-0 w-64 bg-white/5 border-r border-white/10 backdrop-blur-sm
+        lg:translate-x-0 w-64 bg-gradient-to-b from-[#1a1f35]/95 to-[#0a0c1b]/95 border-r-2 border-emerald-500/30 backdrop-blur-md shadow-2xl
+        lg:top-0
+        ${isScrolled ? 'top-0' : 'top-16 lg:top-0'}
       `}>
         <div className="h-full flex flex-col">
-          {/* Logo */}
-          <div className="h-16 flex items-center px-6 border-b border-white/10">
+          {/* Logo - Hidden on mobile since we have top bar */}
+          <div className="h-16 flex items-center px-6 border-b border-white/10 lg:flex hidden">
             <Link 
               href="/" 
               className="text-xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-blue-200 hover:opacity-80 transition-opacity"
@@ -130,10 +161,10 @@ export default function DashboardLayout({
                   onClick={() => handleNavigation(item.href)}
                   disabled={isLoading || isActive}
                   className={`
-                    w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 transform
+                    w-full flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 transform
                     ${isActive 
-                      ? 'bg-white/10 text-white scale-105 shadow-lg' 
-                      : 'text-gray-400 hover:text-white hover:bg-white/5 hover:scale-102'
+                      ? 'bg-emerald-600/30 text-emerald-100 scale-105 shadow-lg border border-emerald-500/40' 
+                      : 'text-gray-300 hover:text-white hover:bg-emerald-600/20 hover:scale-102 hover:border hover:border-emerald-500/30'
                     }
                     ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-md'}
                     disabled:opacity-50 disabled:cursor-not-allowed
@@ -154,8 +185,8 @@ export default function DashboardLayout({
           </nav>
 
           {/* User Profile */}
-          <div className="p-4 border-t border-white/10">
-            <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white/5 transition-all duration-200 hover:bg-white/10">
+          <div className="p-4 border-t border-emerald-500/20">
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-600/20 border border-emerald-500/30 transition-all duration-200 hover:bg-emerald-600/30 hover:border-emerald-400/50">
               <div className="w-8 h-8 bg-emerald-600 rounded-full flex items-center justify-center">
                 <User className="w-4 h-4 text-white" />
               </div>
@@ -168,10 +199,10 @@ export default function DashboardLayout({
           </div>
 
           {/* Sign Out Button */}
-          <div className="border-t border-white/10 p-4">
+          <div className="border-t border-emerald-500/20 p-4">
             <button
               onClick={handleSignOut}
-              className="w-full flex items-center gap-3 px-3 py-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 transform hover:scale-102"
+              className="w-full flex items-center gap-3 px-4 py-3 text-gray-300 hover:text-white hover:bg-red-600/20 hover:border hover:border-red-500/30 rounded-xl transition-all duration-200 transform hover:scale-102"
             >
               <LogOut className="w-5 h-5" />
               Sign Out
@@ -184,6 +215,8 @@ export default function DashboardLayout({
       <main className={`
         transition-all duration-300 ease-in-out
         ${isSidebarOpen ? 'lg:pl-64' : 'lg:pl-0'}
+        lg:pt-0
+        ${isScrolled ? 'pt-0' : 'pt-16 lg:pt-0'}
       `}>
         <div className={`
           min-h-screen transition-opacity duration-200

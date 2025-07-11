@@ -3,17 +3,32 @@
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '@/lib/supabaseClient';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function SignInPage() {
   const router = useRouter();
   const hasRedirected = useRef(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  // Detect mobile device
+  useEffect(() => {
+    const checkMobile = () => {
+      const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera || '';
+      const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent.toLowerCase());
+      setIsMobile(isMobileDevice);
+      console.log('Mobile device detected:', isMobileDevice);
+      console.log('User agent:', userAgent);
+    };
+    checkMobile();
+  }, []);
 
   // Handle successful authentication
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('Auth state change event:', event, 'Session:', !!session);
+      console.log('Is mobile:', isMobile);
       
       if (event === 'SIGNED_IN' && session && !hasRedirected.current) {
         hasRedirected.current = true;
@@ -37,11 +52,18 @@ export default function SignInPage() {
             router.push('/dashboard');
           }, 100);
         }
+      } else if (event === 'SIGNED_OUT') {
+        console.log('User signed out');
+        hasRedirected.current = false;
+      } else if (event === 'TOKEN_REFRESHED') {
+        console.log('Token refreshed');
+      } else if (event === 'USER_UPDATED') {
+        console.log('User updated');
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [router]);
+  }, [router, isMobile]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0c1b] via-[#1a1f35] to-[#0a0c1b] flex items-center justify-center p-4">
@@ -54,7 +76,25 @@ export default function SignInPage() {
           <p className="text-gray-400">
             Sign in to build your professional resume
           </p>
+          {isMobile && (
+            <p className="text-sm text-yellow-400 mt-2">
+              Mobile device detected - Using optimized authentication
+            </p>
+          )}
         </div>
+
+        {/* Error Message */}
+        {authError && (
+          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-6">
+            <p className="text-red-400 text-sm">{authError}</p>
+            <button 
+              onClick={() => setAuthError(null)}
+              className="text-red-300 text-xs mt-2 hover:text-red-200"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
 
         {/* Auth Container */}
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 shadow-2xl">
