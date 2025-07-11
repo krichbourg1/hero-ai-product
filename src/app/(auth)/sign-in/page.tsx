@@ -2,7 +2,7 @@
 
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
-import { supabase, getRedirectUrl } from '@/lib/supabaseClient';
+import { supabase } from '@/lib/supabaseClient';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -11,10 +11,6 @@ export default function SignInPage() {
   const hasRedirected = useRef(false);
   const [isMobile, setIsMobile] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
-  
-  // Get the redirect URL and log it for debugging
-  const redirectUrl = getRedirectUrl();
-  console.log('SignInPage redirect URL:', redirectUrl);
 
   // Detect mobile device
   useEffect(() => {
@@ -41,20 +37,32 @@ export default function SignInPage() {
         const intendedDestination = localStorage.getItem('intendedDestination');
         console.log('Auth state changed - intended destination:', intendedDestination);
         
-        if (intendedDestination) {
-          // Clear the stored destination
-          localStorage.removeItem('intendedDestination');
-          console.log('Redirecting to:', intendedDestination);
-          
-          // Use setTimeout to ensure the redirect happens after the current execution
+        // For mobile, we need to handle the redirect differently
+        if (isMobile) {
+          console.log('Mobile authentication successful - redirecting');
+          // Use window.location for mobile to ensure proper redirect
           setTimeout(() => {
-            router.push(intendedDestination);
-          }, 100);
+            if (intendedDestination) {
+              localStorage.removeItem('intendedDestination');
+              window.location.href = intendedDestination;
+            } else {
+              window.location.href = '/dashboard';
+            }
+          }, 500);
         } else {
-          console.log('No intended destination, going to dashboard');
-          setTimeout(() => {
-            router.push('/dashboard');
-          }, 100);
+          // Desktop redirect using Next.js router
+          if (intendedDestination) {
+            localStorage.removeItem('intendedDestination');
+            console.log('Redirecting to:', intendedDestination);
+            setTimeout(() => {
+              router.push(intendedDestination);
+            }, 100);
+          } else {
+            console.log('No intended destination, going to dashboard');
+            setTimeout(() => {
+              router.push('/dashboard');
+            }, 100);
+          }
         }
       } else if (event === 'SIGNED_OUT') {
         console.log('User signed out');
@@ -104,7 +112,6 @@ export default function SignInPage() {
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 shadow-2xl">
           <Auth 
             supabaseClient={supabase}
-            redirectTo={redirectUrl}
             queryParams={{
               access_type: 'offline',
               prompt: 'consent',
