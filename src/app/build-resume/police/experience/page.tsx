@@ -25,6 +25,11 @@ export default function PoliceExperiencePage() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
+  const [zipCode, setZipCode] = useState('');
   const [department, setDepartment] = useState('');
 
   // Check authentication
@@ -53,6 +58,11 @@ export default function PoliceExperiencePage() {
         setFirstName(savedData.personalInfo?.firstName || '');
         setLastName(savedData.personalInfo?.lastName || '');
         setEmail(savedData.personalInfo?.email || user?.email || '');
+        setPhone(savedData.personalInfo?.phone || '');
+        setAddress(savedData.personalInfo?.address || '');
+        setCity(savedData.personalInfo?.city || '');
+        setState(savedData.personalInfo?.state || '');
+        setZipCode(savedData.personalInfo?.zipCode || '');
         setDepartment(savedData.experience?.department || '');
         setStartDate(savedData.experience?.startDate || '');
         setEndDate(savedData.experience?.endDate || '');
@@ -99,7 +109,12 @@ export default function PoliceExperiencePage() {
       personalInfo: {
         firstName,
         lastName,
-        email
+        email,
+        phone,
+        address,
+        city,
+        state,
+        zipCode
       },
       experience: {
         startDate,
@@ -115,6 +130,32 @@ export default function PoliceExperiencePage() {
     const savedResumeId = saveResumeProgress(experienceData);
     
     console.log('Police experience saved with ID:', savedResumeId);
+    
+    // Save personal information to user profile
+    try {
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: user?.id,
+          first_name: firstName,
+          last_name: lastName,
+          email: email,
+          phone: phone,
+          address: address,
+          city: city,
+          state: state,
+          zip_code: zipCode,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'id' });
+
+      if (profileError) {
+        console.error('Error saving profile:', profileError);
+      } else {
+        console.log('Personal information saved to user profile');
+      }
+    } catch (error) {
+      console.error('Error saving profile:', error);
+    }
     
     // Navigate to the skills step with the resumeId
     router.push(`/build-resume/police/skills?position=${position}&rank=${rank}&resumeId=${savedResumeId}`);
@@ -182,25 +223,87 @@ export default function PoliceExperiencePage() {
               />
             </div>
             <div className="space-y-2">
-              <label className="block text-lg font-medium text-white flex items-center gap-2">
-                Department/Agency *
-                <span className="text-red-400 text-base">⚠️</span>
+              <label className="block text-lg font-medium text-white">
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="Enter your phone number"
+                className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <label className="block text-lg font-medium text-white">
+              Address
+            </label>
+            <input
+              type="text"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="Enter your street address"
+              className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="space-y-2">
+              <label className="block text-lg font-medium text-white">
+                City
               </label>
               <input
                 type="text"
-                value={department}
-                onChange={(e) => setDepartment(e.target.value)}
-                placeholder="e.g., Metro Police Department, Sheriff's Office"
-                className={`w-full px-4 py-2 rounded-lg border text-white placeholder-white/50 focus:outline-none focus:ring-2 transition-all ${
-                  department 
-                    ? 'bg-white/10 border-emerald-500/50 focus:ring-emerald-500' 
-                    : 'bg-white/10 border-red-400/50 focus:ring-red-400'
-                }`}
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                placeholder="Enter your city"
+                className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
-              <p className="text-sm text-blue-200">
-                📍 This is important! Specify the law enforcement agency where you served.
-              </p>
             </div>
+            <div className="space-y-2">
+              <label className="block text-lg font-medium text-white">
+                State
+              </label>
+              <input
+                type="text"
+                value={state}
+                onChange={(e) => setState(e.target.value)}
+                placeholder="Enter your state"
+                className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-lg font-medium text-white">
+                Zip Code
+              </label>
+              <input
+                type="text"
+                value={zipCode}
+                onChange={(e) => setZipCode(e.target.value)}
+                placeholder="Enter your zip code"
+                className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <label className="block text-lg font-medium text-white flex items-center gap-2">
+              Department/Agency *
+              <span className="text-red-400 text-base">⚠️</span>
+            </label>
+            <input
+              type="text"
+              value={department}
+              onChange={(e) => setDepartment(e.target.value)}
+              placeholder="e.g., Metro Police Department, Sheriff's Office"
+              className={`w-full px-4 py-2 rounded-lg border text-white placeholder-white/50 focus:outline-none focus:ring-2 transition-all ${
+                department 
+                  ? 'bg-white/10 border-emerald-500/50 focus:ring-emerald-500' 
+                  : 'bg-white/10 border-red-400/50 focus:ring-red-400'
+              }`}
+            />
+            <p className="text-sm text-blue-200">
+              📍 This is important! Specify the law enforcement agency where you served.
+            </p>
           </div>
         </div>
 
