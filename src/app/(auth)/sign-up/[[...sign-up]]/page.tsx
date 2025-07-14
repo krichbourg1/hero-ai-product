@@ -5,15 +5,12 @@ import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '@/lib/supabaseClient';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { CheckCircle, Mail, AlertCircle } from 'lucide-react';
 
 export default function SignUpPage() {
   const router = useRouter();
   const hasRedirected = useRef(false);
   const [isMobile, setIsMobile] = useState(false);
   const [showLinkedInWarning, setShowLinkedInWarning] = useState(false);
-  const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
-  const [userEmail, setUserEmail] = useState('');
 
   // Detect mobile device and LinkedIn WebView
   useEffect(() => {
@@ -34,10 +31,7 @@ export default function SignUpPage() {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (event === 'SIGNED_IN' && session?.user && !session.user.email_confirmed_at) {
-          setShowEmailConfirmation(true);
-          setUserEmail(session.user.email || '');
-        } else if (event === 'SIGNED_IN' && session && !hasRedirected.current) {
+        if (event === 'SIGNED_IN' && session && !hasRedirected.current) {
           hasRedirected.current = true;
           
           // Get intended destination from URL params
@@ -74,32 +68,15 @@ export default function SignUpPage() {
     }
   };
 
-  const handleResendEmail = async () => {
-    if (userEmail) {
-      try {
-        const { error } = await supabase.auth.resend({
-          type: 'signup',
-          email: userEmail,
-        });
-        
-        if (error) {
-          console.error('Error resending email:', error);
-        } else {
-          alert('Confirmation email resent! Please check your inbox.');
-        }
-      } catch (error) {
-        console.error('Error resending email:', error);
-      }
-    }
-  };
-
   if (showLinkedInWarning) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex items-center justify-center p-4">
         <div className="glass-effect rounded-lg p-8 max-w-md w-full text-center">
           <div className="mb-6">
             <div className="w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <AlertCircle className="w-8 h-8 text-white" />
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
             </div>
             <h2 className="text-2xl font-bold text-white mb-2">LinkedIn Browser Detected</h2>
             <p className="text-blue-200 mb-6">
@@ -131,63 +108,9 @@ export default function SignUpPage() {
     );
   }
 
-  if (showEmailConfirmation) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex items-center justify-center p-4">
-        <div className="glass-effect rounded-lg p-8 max-w-md w-full text-center">
-          <div className="mb-6">
-            <div className="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Mail className="w-10 h-10 text-white" />
-            </div>
-            <h2 className="text-3xl font-bold text-white mb-4">Check Your Email!</h2>
-            <p className="text-lg text-blue-200 mb-2">
-              We&apos;ve sent a confirmation link to:
-            </p>
-            <p className="text-xl font-semibold text-emerald-400 mb-6 break-all">
-              {userEmail}
-            </p>
-            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-4 mb-6">
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-emerald-400 mt-0.5 flex-shrink-0" />
-                <div className="text-left">
-                  <p className="text-white font-medium mb-2">Next Steps:</p>
-                  <ul className="text-blue-200 text-sm space-y-1">
-                    <li>• Check your email inbox (and spam folder)</li>
-                    <li>• Click the confirmation link in the email</li>
-                    <li>• You&apos;ll be automatically signed in</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="space-y-4">
-            <button
-              onClick={handleResendEmail}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
-            >
-              Resend Confirmation Email
-            </button>
-            
-            <button
-              onClick={() => setShowEmailConfirmation(false)}
-              className="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
-            >
-              Back to Sign Up
-            </button>
-          </div>
-          
-          <p className="text-sm text-gray-400 mt-6">
-            Didn&apos;t receive the email? Check your spam folder or try resending.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex items-center justify-center p-4">
-      <div className="glass-effect rounded-lg p-8 max-w-md w-full">
+    <div className="min-h-screen bg-[#0a0c1b] flex items-center justify-center p-4">
+      <div className="bg-white/5 backdrop-blur-sm rounded-lg p-8 max-w-md w-full border border-white/10">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">Join HERO.AI</h1>
           <p className="text-blue-200">Create your account to start building your resume</p>
