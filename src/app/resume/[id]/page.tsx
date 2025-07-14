@@ -13,6 +13,9 @@ interface PersonalInfo {
   email: string;
   phone?: string;
   address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
 }
 
 interface WorkExperience {
@@ -98,7 +101,40 @@ export default function ResumePage() {
       if (params.id) {
         const savedData = localStorage.getItem(`resume-${params.id}`);
         if (savedData) {
-          setResumeData(JSON.parse(savedData));
+          const parsedData = JSON.parse(savedData);
+          
+          // Also fetch the latest profile information from the database
+          try {
+            const { data: profileData, error: profileError } = await supabase
+              .from('profiles')
+              .select('first_name, last_name, email, phone, address, city, state, zip_code')
+              .eq('id', user.id)
+              .single();
+            
+            if (profileData && !profileError) {
+              // Merge profile data with resume data, prioritizing profile data for personal info
+              const updatedResumeData = {
+                ...parsedData,
+                personalInfo: {
+                  ...parsedData.personalInfo,
+                  firstName: profileData.first_name || parsedData.personalInfo?.firstName || '',
+                  lastName: profileData.last_name || parsedData.personalInfo?.lastName || '',
+                  email: profileData.email || parsedData.personalInfo?.email || '',
+                  phone: profileData.phone || parsedData.personalInfo?.phone || '',
+                  address: profileData.address || parsedData.personalInfo?.address || '',
+                  city: profileData.city || parsedData.personalInfo?.city || '',
+                  state: profileData.state || parsedData.personalInfo?.state || '',
+                  zipCode: profileData.zip_code || parsedData.personalInfo?.zipCode || '',
+                }
+              };
+              setResumeData(updatedResumeData);
+            } else {
+              setResumeData(parsedData);
+            }
+          } catch (error) {
+            console.error('Error fetching profile data:', error);
+            setResumeData(parsedData);
+          }
         } else {
           // If no data found, redirect to dashboard
           router.push('/dashboard');
@@ -297,38 +333,34 @@ export default function ResumePage() {
             <div style={{ fontSize: '22pt', fontWeight: 'bold', letterSpacing: '1px', textTransform: 'uppercase', textAlign: 'center' }}>
               {resumeData.personalInfo.firstName} {resumeData.personalInfo.lastName}
             </div>
-            {/* City, State ZIP | Phone */}
-            <div style={{ fontSize: '11pt', marginTop: '0.2em', textAlign: 'center' }}>
+            {/* Address Line */}
+            {(resumeData.personalInfo.address || resumeData.personalInfo.city || resumeData.personalInfo.state || resumeData.personalInfo.zipCode) && (
+              <div style={{ fontSize: '11pt', marginTop: '0.2em', textAlign: 'center' }}>
+                {(() => {
+                  const parts = [];
+                  if (resumeData.personalInfo.address) parts.push(resumeData.personalInfo.address);
+                  if (resumeData.personalInfo.city && resumeData.personalInfo.state) {
+                    parts.push(`${resumeData.personalInfo.city}, ${resumeData.personalInfo.state}`);
+                  } else if (resumeData.personalInfo.city) {
+                    parts.push(resumeData.personalInfo.city);
+                  } else if (resumeData.personalInfo.state) {
+                    parts.push(resumeData.personalInfo.state);
+                  }
+                  if (resumeData.personalInfo.zipCode) parts.push(resumeData.personalInfo.zipCode);
+                  
+                  return parts.join(', ');
+                })()}
+              </div>
+            )}
+            {/* Contact Information */}
+            <div style={{ fontSize: '11pt', marginTop: '0.1em', textAlign: 'center' }}>
               {(() => {
-                // Try to extract city, state, zip from address
-                const address = resumeData.personalInfo.address || '';
-                // Simple regex for City, State ZIP
-                const match = address.match(/([\w\s\.-]+),\s*([A-Z]{2})\s*(\d{5})?/);
-                if (match) {
-                  const city = match[1].trim();
-                  const state = match[2];
-                  const zip = match[3] ? match[3] : '';
-                  return (
-                    <>
-                      {city}, {state}{zip && ` ${zip}`} {resumeData.personalInfo.phone && (
-                        <> | {resumeData.personalInfo.phone}</>
-                      )}
-                    </>
-                  );
-                } else {
-                  // Fallback: show address as-is, then phone
-                  return (
-                    <>
-                      {address}{resumeData.personalInfo.phone && (
-                        <> | {resumeData.personalInfo.phone}</>
-                      )}
-                    </>
-                  );
-                }
+                const contactParts = [];
+                if (resumeData.personalInfo.phone) contactParts.push(resumeData.personalInfo.phone);
+                if (resumeData.personalInfo.email) contactParts.push(resumeData.personalInfo.email);
+                return contactParts.join(' | ');
               })()}
             </div>
-            {/* Email */}
-            <div style={{ fontSize: '11pt', marginTop: '0.1em', textAlign: 'center' }}>{resumeData.personalInfo.email}</div>
           </div>
 
           {/* SUMMARY */}
