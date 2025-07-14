@@ -407,13 +407,11 @@ export default function ResumePage() {
                     }
                   }
                   
-                  // Education background
-                  if (education) {
+                  // Education background (only if no duties mentioned)
+                  if (education && (!militaryExp || !('duties' in militaryExp) || !militaryExp.duties)) {
                     const primaryEducation = resumeData.education[0];
                     if (primaryEducation.degree && primaryEducation.field) {
                       summary += `Holds a ${primaryEducation.degree} in ${primaryEducation.field} from ${primaryEducation.school}. `;
-                    } else if (primaryEducation.school) {
-                      summary += `Educated at ${primaryEducation.school}. `;
                     }
                   }
                   
@@ -423,24 +421,14 @@ export default function ResumePage() {
                     summary += `Combined military background with civilian experience as ${civilianJob.position} at ${civilianJob.company}. `;
                   }
                   
-                  // Key skills and qualities
-                  if (skills) {
-                    const softSkills = resumeData.skills.filter(skill => skill.type === 'soft').slice(0, 3);
-                    const hardSkills = resumeData.skills.filter(skill => skill.type === 'hard').slice(0, 3);
-                    
-                    if (softSkills.length > 0) {
-                      const skillNames = softSkills.map(skill => skill.name).join(', ');
-                      summary += `Demonstrates strong ${skillNames.toLowerCase()}. `;
-                    }
-                    
-                    if (hardSkills.length > 0) {
-                      const skillNames = hardSkills.map(skill => skill.name).join(', ');
-                      summary += `Proficient in ${skillNames.toLowerCase()}. `;
-                    }
+                  // Key skills (only if no civilian experience mentioned)
+                  if (skills && !civilianExp) {
+                    const topSkills = resumeData.skills.slice(0, 2).map((skill: any) => skill.name || skill).join(' and ');
+                    summary += `Proficient in ${topSkills}. `;
                   }
                   
                   // Universal military values and closing
-                  summary += `Known for unwavering commitment to mission success, exceptional work ethic, and ability to thrive in high-pressure environments. Proven track record of leading teams, solving complex problems, and delivering results under challenging circumstances. Seeking to leverage military training, leadership experience, and dedication to excellence in a civilian career where discipline, teamwork, and operational excellence are valued.`;
+                  summary += `Demonstrates exceptional leadership, problem-solving abilities, and unwavering commitment to mission success.`;
                   
                   return summary;
                 }
