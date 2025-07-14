@@ -267,7 +267,7 @@ export default function MilitaryExperiencePage() {
     setCivilianExperiences((civilianExperiences || []).filter(exp => exp.id !== id));
   };
 
-  const handleSaveAndContinue = () => {
+  const handleSaveAndContinue = async () => {
     // Use stable resumeId pattern
     const stableResumeId = resumeId || `resume-${user?.id}-${branch}-${mos}-${rank}`;
     

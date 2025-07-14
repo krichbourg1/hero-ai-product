@@ -96,7 +96,7 @@ export default function PoliceExperiencePage() {
     </div>;
   }
 
-  const handleSaveAndContinue = () => {
+  const handleSaveAndContinue = async () => {
     // Save the experience data
     const experienceData: Partial<ResumeData> = {
       id: resumeId,
