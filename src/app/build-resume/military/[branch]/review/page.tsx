@@ -7,6 +7,7 @@ import { ArrowLeft, Check } from 'lucide-react';
 import { militaryOccupations, militaryRanks } from '@/data/military-data';
 import { MilitaryRankVariations } from '@/types/military-rank-variations';
 import { loadResumeData, saveResumeProgress, debugResumeStorage } from '@/lib/resume-utils';
+import { trackResumeGeneration } from '@/lib/resume-tracking';
 
 interface EducationEntry {
   type: 'college' | 'military' | 'police-academy' | 'training' | 'certification' | 'none';
@@ -176,7 +177,7 @@ export default function MilitaryReviewPage() {
     router.push(backUrl);
   };
 
-  const handleGenerateResume = () => {
+  const handleGenerateResume = async () => {
     // Use the existing resumeId instead of generating a new one
     const finalResumeId = resumeId || `${branch}-${mos}-${rank}-${Date.now()}`;
     
@@ -201,6 +202,15 @@ export default function MilitaryReviewPage() {
 
     // Save the complete resume data using saveResumeProgress
     saveResumeProgress(completeResumeData);
+
+    // Track the resume generation
+    await trackResumeGeneration({
+      resumeId: finalResumeId,
+      serviceType: 'military',
+      branch: branch,
+      mos: mos || '',
+      rank: rank || ''
+    });
 
     // Navigate to the formatted resume page
     router.push(`/resume/${finalResumeId}`);

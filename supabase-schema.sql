@@ -159,3 +159,40 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 CREATE TRIGGER on_auth_user_created
     AFTER INSERT ON auth.users
     FOR EACH ROW EXECUTE FUNCTION public.handle_new_user(); 
+
+-- Resume Generation Tracking Table
+CREATE TABLE IF NOT EXISTS resume_generations (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  resume_id TEXT NOT NULL,
+  service_type TEXT NOT NULL, -- 'military', 'police', etc.
+  branch TEXT, -- for military resumes
+  mos TEXT, -- for military resumes
+  rank TEXT, -- for military resumes
+  position TEXT, -- for police resumes
+  generated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  user_email TEXT,
+  user_agent TEXT,
+  ip_address TEXT
+);
+
+-- Create index for faster queries
+CREATE INDEX IF NOT EXISTS idx_resume_generations_user_id ON resume_generations(user_id);
+CREATE INDEX IF NOT EXISTS idx_resume_generations_generated_at ON resume_generations(generated_at);
+CREATE INDEX IF NOT EXISTS idx_resume_generations_service_type ON resume_generations(service_type);
+
+-- Enable RLS
+ALTER TABLE resume_generations ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policies
+CREATE POLICY "Users can view their own resume generations" ON resume_generations
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own resume generations" ON resume_generations
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Admin policy (you can adjust this based on your needs)
+CREATE POLICY "Admins can view all resume generations" ON resume_generations
+  FOR ALL USING (auth.uid() IN (
+    SELECT id FROM auth.users WHERE email = 'your-admin-email@example.com'
+  )); 

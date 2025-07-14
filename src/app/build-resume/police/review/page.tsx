@@ -7,6 +7,7 @@ import { policePositions, policeRanks } from '@/data/police-data';
 import { loadResumeData, ResumeData } from '@/lib/resume-utils';
 import { useNotification, Notification } from '@/components/ui/notification';
 import { saveResumeProgress } from '@/lib/resume-utils';
+import { trackResumeGeneration } from '@/lib/resume-tracking';
 import { supabase } from '@/lib/supabaseClient';
 
 export default function PoliceReviewPage() {
@@ -81,7 +82,7 @@ export default function PoliceReviewPage() {
     router.push(`/build-resume/police/skills?position=${position}&rank=${rank}&resumeId=${resumeId}`);
   };
 
-  const handleGenerateResume = () => {
+  const handleGenerateResume = async () => {
     // Use the existing resumeId instead of generating a new one
     const finalResumeId = resumeId || `police-${position}-${rank}-${Date.now()}`;
     
@@ -117,6 +118,13 @@ export default function PoliceReviewPage() {
 
     // Save the complete resume data using the saveResumeProgress function
     saveResumeProgress(completeResumeData);
+
+    // Track the resume generation
+    await trackResumeGeneration({
+      resumeId: finalResumeId,
+      serviceType: 'police',
+      position: position
+    });
 
     // Navigate to the formatted resume page
     router.push(`/resume/${finalResumeId}`);
