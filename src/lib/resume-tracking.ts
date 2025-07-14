@@ -11,8 +11,11 @@ export interface ResumeGenerationData {
 
 export async function trackResumeGeneration(data: ResumeGenerationData) {
   try {
+    console.log('🚀 Starting resume generation tracking...', data);
+    
     // Get current user
     const { data: { user } } = await supabase.auth.getUser();
+    console.log('👤 Current user:', user?.email);
     
     // Get user agent and IP (if available)
     const userAgent = typeof window !== 'undefined' ? window.navigator.userAgent : null;
@@ -30,19 +33,22 @@ export async function trackResumeGeneration(data: ResumeGenerationData) {
       ip_address: null // Will be captured by server-side tracking if needed
     };
 
+    console.log('📊 Inserting tracking data:', trackingData);
+
     // Insert tracking record
-    const { error } = await supabase
+    const { data: insertData, error } = await supabase
       .from('resume_generations')
-      .insert(trackingData);
+      .insert(trackingData)
+      .select();
 
     if (error) {
-      console.error('Error tracking resume generation:', error);
+      console.error('❌ Error tracking resume generation:', error);
       // Don't throw error to avoid breaking the user experience
     } else {
-      console.log('Resume generation tracked successfully:', trackingData);
+      console.log('✅ Resume generation tracked successfully:', insertData);
     }
   } catch (error) {
-    console.error('Error in trackResumeGeneration:', error);
+    console.error('💥 Error in trackResumeGeneration:', error);
     // Don't throw error to avoid breaking the user experience
   }
 }
