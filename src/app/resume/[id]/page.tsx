@@ -356,7 +356,17 @@ export default function ResumePage() {
             <div style={{ fontSize: '11pt', marginTop: '0.1em', textAlign: 'center' }}>
               {(() => {
                 const contactParts = [];
-                if (resumeData.personalInfo.phone) contactParts.push(resumeData.personalInfo.phone);
+                if (resumeData.personalInfo.phone) {
+                  // Format phone number to (XXX) XXX-XXXX
+                  const phone = resumeData.personalInfo.phone.replace(/\D/g, ''); // Remove all non-digits
+                  if (phone.length === 10) {
+                    const formattedPhone = `(${phone.slice(0, 3)}) ${phone.slice(3, 6)}-${phone.slice(6)}`;
+                    contactParts.push(formattedPhone);
+                  } else {
+                    // If not 10 digits, use as-is
+                    contactParts.push(resumeData.personalInfo.phone);
+                  }
+                }
                 if (resumeData.personalInfo.email) contactParts.push(resumeData.personalInfo.email);
                 return contactParts.join(' | ');
               })()}
@@ -367,11 +377,74 @@ export default function ResumePage() {
           <div style={{ marginBottom: '0.7em' }}>
             <div style={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: '13pt', letterSpacing: '1px', marginBottom: '0.1em', textAlign: 'center' }}>Summary</div>
             <div style={{ textAlign: 'justify', fontSize: '11.5pt', marginBottom: '0.2em' }}>
-              {resumeData.serviceType === 'police' ? (
-                `Dedicated ${resumeData.rankTitle || 'Police Officer'} with proven experience as a ${resumeData.mosTitle || 'Law Enforcement Professional'} in the ${resumeData.branch || 'Police Department'}. Demonstrated expertise in leadership, problem-solving, and operational excellence. Seeking to leverage law enforcement experience and skills in a civilian career.`
-              ) : (
-                `Mathematically driven Data Scientist and Software Engineer with a background in nuclear engineering and a track record of applying advanced statistical methods, machine learning, and data-driven insights to solve complex problems. U.S. Navy veteran with experience operating in high-stress environments, bringing a disciplined, analytical approach to cybersecurity, network security, and information security. Proficient in Python, SQL, Splunk, and data warehousing, developing efficient machine learning models, predictive analytics, and automated security insights. Passionate about leveraging statistical modeling, algorithm optimization, and automation to drive efficiency and innovation in fast-paced technical environments.`
-              )}
+              {(() => {
+                if (resumeData.serviceType === 'police') {
+                  return `Dedicated ${resumeData.rankTitle || 'Police Officer'} with proven experience as a ${resumeData.mosTitle || 'Law Enforcement Professional'} in the ${resumeData.branch || 'Police Department'}. Demonstrated expertise in leadership, problem-solving, and operational excellence. Seeking to leverage law enforcement experience and skills in a civilian career.`;
+                } else {
+                  // Generate highly personalized military summary based on actual user data
+                  const militaryExp = resumeData.militaryExperiences?.[0] || resumeData.workExperience;
+                  const civilianExp = resumeData.civilianExperiences && resumeData.civilianExperiences.length > 0;
+                  const education = resumeData.education?.length > 0;
+                  const skills = resumeData.skills?.length > 0;
+                  
+                  let summary = `${resumeData.personalInfo.firstName} is a `;
+                  
+                  // Military experience description
+                  if (militaryExp) {
+                    const branch = resumeData.branch || 'U.S. Military';
+                    const rank = resumeData.rankTitle || resumeData.rank || 'Service Member';
+                    const mos = resumeData.mosTitle || resumeData.mos || 'Military Occupational Specialty';
+                    
+                    summary += `${branch} veteran who served as ${rank} in ${mos}. `;
+                    
+                    // Add specific duties if available (first 2-3 key points)
+                    if ('duties' in militaryExp && militaryExp.duties) {
+                      const dutyLines = militaryExp.duties.split('\n').filter((line: string) => line.trim().length > 0).slice(0, 2);
+                      if (dutyLines.length > 0) {
+                        const keyDuties = dutyLines.map((line: string) => line.trim().replace(/^[-•*]\s*/, '')).join(', ');
+                        summary += `During service, ${resumeData.personalInfo.firstName} ${keyDuties.toLowerCase()}. `;
+                      }
+                    }
+                  }
+                  
+                  // Education background
+                  if (education) {
+                    const primaryEducation = resumeData.education[0];
+                    if (primaryEducation.degree && primaryEducation.field) {
+                      summary += `Holds a ${primaryEducation.degree} in ${primaryEducation.field} from ${primaryEducation.school}. `;
+                    } else if (primaryEducation.school) {
+                      summary += `Educated at ${primaryEducation.school}. `;
+                    }
+                  }
+                  
+                  // Civilian work experience
+                  if (civilianExp && resumeData.civilianExperiences) {
+                    const civilianJob = resumeData.civilianExperiences[0];
+                    summary += `Combined military background with civilian experience as ${civilianJob.position} at ${civilianJob.company}. `;
+                  }
+                  
+                  // Key skills and qualities
+                  if (skills) {
+                    const softSkills = resumeData.skills.filter(skill => skill.type === 'soft').slice(0, 3);
+                    const hardSkills = resumeData.skills.filter(skill => skill.type === 'hard').slice(0, 3);
+                    
+                    if (softSkills.length > 0) {
+                      const skillNames = softSkills.map(skill => skill.name).join(', ');
+                      summary += `Demonstrates strong ${skillNames.toLowerCase()}. `;
+                    }
+                    
+                    if (hardSkills.length > 0) {
+                      const skillNames = hardSkills.map(skill => skill.name).join(', ');
+                      summary += `Proficient in ${skillNames.toLowerCase()}. `;
+                    }
+                  }
+                  
+                  // Universal military values and closing
+                  summary += `Known for unwavering commitment to mission success, exceptional work ethic, and ability to thrive in high-pressure environments. Proven track record of leading teams, solving complex problems, and delivering results under challenging circumstances. Seeking to leverage military training, leadership experience, and dedication to excellence in a civilian career where discipline, teamwork, and operational excellence are valued.`;
+                  
+                  return summary;
+                }
+              })()}
             </div>
           </div>
 
