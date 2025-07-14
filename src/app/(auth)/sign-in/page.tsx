@@ -36,7 +36,7 @@ export default function SignInPage() {
           
           // Get intended destination from URL params
           const urlParams = new URLSearchParams(window.location.search);
-          const intendedDestination = urlParams.get('redirectTo') || '/dashboard';
+          const intendedDestination = urlParams.get('redirectTo') || '/build-resume';
           
           if (isMobile) {
             // For mobile devices, use window.location.href
