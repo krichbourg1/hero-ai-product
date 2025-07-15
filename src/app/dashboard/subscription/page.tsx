@@ -27,29 +27,30 @@ const plans: Plan[] = [
   {
     id: 'pro',
     name: 'Professional',
-    price: 12.99,
+    price: 9.99,
     features: [
-      'Create 3 resumes',
+      'Create 10 resumes',
       'AI Power transformations',
       'Priority support',
       'Premium templates',
       'Export to multiple formats',
-      'Custom branding'
-    ],
-    isPopular: true
+      'Advanced customization'
+    ]
   },
   {
     id: 'premium-pro',
     name: 'Premium Pro',
-    price: 24.99,
+    price: 14.99,
     features: [
-      'Unlimited resumes',
+      'Create 25 resumes',
       'AI Power suggestions',
       'Job link resume tailoring',
       'Dedicated support',
       'All Professional features',
-      'Custom integrations'
-    ]
+      'Resume analytics',
+      'Custom branding'
+    ],
+    isPopular: true
   }
 ];
 
