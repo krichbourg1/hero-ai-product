@@ -31,6 +31,21 @@ export const SUBSCRIPTION_TIERS: Record<string, SubscriptionTier> = {
       'Advanced Customization'
     ]
   },
+  premiumPro: {
+    id: 'premiumPro',
+    name: 'Premium Pro',
+    maxResumes: 25,
+    price: 14.99,
+    features: [
+      '25 Resumes',
+      'All Templates',
+      'Priority Support',
+      'Export Options',
+      'Advanced Customization',
+      'Resume Analytics',
+      'Custom Branding'
+    ]
+  },
   enterprise: {
     id: 'enterprise',
     name: 'Enterprise',

@@ -102,7 +102,7 @@ export default function SubscriptionPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
             {Object.entries(SUBSCRIPTION_TIERS).map(([tierId, tier]) => {
               const isSelected = selectedTier === tierId;
-              const isPopular = tierId === 'professional';
+              const isPopular = tierId === 'premiumPro';
               
               return (
                 <div
